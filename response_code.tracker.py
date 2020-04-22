@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-__version__ =  '00'
+__version__ =  '001'
 
 import sys
 sys.dont_write_bytecode = True
@@ -104,6 +104,6 @@ if __name__ == '__main__':
 
     #print(dct)
     import json
-    print(json.dumps(dct, sort_keys=False, indent=4))
+    print(json.dumps(dct, sort_keys=True, indent=4))
 
 
