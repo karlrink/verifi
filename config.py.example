@@ -1,7 +1,9 @@
 
-gclid = dict(
+param = dict(
   dbUser = 'XXXX',
-  dbPass = 'XXXXXXXX',
-  dbSocket = '/var/run/mysqld/mysqld.sock'
+  dbPass = 'XXXXXXXXXXXX',
+  dbSocket = '/var/run/mysqld/mysqld.sock',
+  system_id = 'XXXXXXXXXX',
+  url = 'https://monitor.nationsinfocorp.com:443/collector',
 )
 
