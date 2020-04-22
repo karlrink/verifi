@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-__version__ =  '0'
+__version__ =  '00'
 
 import sys
 sys.dont_write_bytecode = True
@@ -86,8 +86,24 @@ if __name__ == '__main__':
 
     results = get_results()
 
+    rcDict = {}
+    count = 0
     if results:
         for (id_gateway_response_data, id_transaction, response, response_message, processor_txn_type, response_code) in results:
-            print(id_gateway_response_data, id_transaction, response, response_message, processor_txn_type, response_code)
+            if arg1 == '--print-raw':
+                print(id_gateway_response_data, id_transaction, response, response_message, processor_txn_type, response_code)
+            count += 1
+            rcDict[count] = response_code
+
+
+    #print(rcDict)
+    from collections import defaultdict
+    dct = defaultdict(int)
+    for k,v in rcDict.items():
+        dct[v] += 1
+
+    #print(dct)
+    import json
+    print(json.dumps(dct, sort_keys=False, indent=4))
 
 
