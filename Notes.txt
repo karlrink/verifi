@@ -1,0 +1,27 @@
+
+graphs go empty when slave falls Seconds_Behind_Master
+
+karl.rink@db01repl3:~$ /home/karl.rink/verifi/response_code.tracker.py 5m 
+{
+    "rrdata": [
+        {
+            "rrd": "verifi", 
+            "type": "response_code", 
+            "val": {}
+        }
+    ], 
+    "system_id": "s2865f37f7f545a78fd916563f002dc8"
+}
+{"val": "Empty"}
+karl.rink@db01repl3:~$ ./show.slave.status.py 
+Master_Host: db01.nationsinfo.internal
+Slave_IO_Running: Yes
+Slave_SQL_Running: Yes
+Replicate_Ignore_DB: backups
+Replicate_Ignore_Table: nic_billing.customers_to_delete
+Last_IO_Errno: 0
+Last_IO_Error: 0
+Seconds_Behind_Master: 3926
+karl.rink@db01repl3:~$
+
+
