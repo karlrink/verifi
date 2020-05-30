@@ -7,7 +7,8 @@ Usage: ./response_code.tracker.py [option]
         --print-raw
         --write-local
         --disable-post
-        
+
+```        
 karl.rink@db01repl3:~/verifi$ ./response_code.tracker.py --print-raw --write-local --disable-post
 (137389681, 137463320, u'1', u'Transaction Void Successful', u'void', u'100')
 (137389682, 137463321, u'2', u'Transaction failed  because of payment processing failure.: 302 - Insufficient funds. Please use another card or contact your bank for assistance', u'sale', u'202')
@@ -131,5 +132,6 @@ real	0m0.163s
 user	0m0.088s
 sys	0m0.012s
 
+```
 
 
