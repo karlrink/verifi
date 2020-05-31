@@ -1,17 +1,22 @@
 #!/usr/bin/env python3
 
-__version__='0000'
+__version__='0000.0'
 
 import time
-from http.server import HTTPServer, BaseHTTPRequestHandler
-
-import threading
 import sys
 sys.dont_write_bytecode = True
 
+from http.server import HTTPServer, BaseHTTPRequestHandler
 PORT_NUMBER = 9181
 
-gData = {}
+import threading
+#import queue
+#qData = queue.Queue()
+
+from collections import defaultdict
+
+#gData = {}
+gList = []
 sigterm = False
 
 try:
@@ -35,12 +40,13 @@ class Handler(BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header("Content-type", "text/html; charset=utf-8")
             self.end_headers()
-            self.wfile.write(bytes('hello world \n','utf-8'))
-            self.wfile.write(bytes(self.path + ' \n','utf-8'))
-            self.wfile.write(bytes(str(gData) + str(' \n'),'utf-8'))
-            self.wfile.write(bytes(str(self.command),'utf-8'))
-            #self.wfile.write(b'close')
-            #self.wfile.write("<html><head><title>Title goes here.</title></head>")
+            self.wfile.write(bytes(str(self.command) + str(' \n'),'utf-8'))
+
+            #for item in qData.queue:
+            for item in gList:
+                self.wfile.write(bytes(str(item) + str(' \n'),'utf-8'))
+
+
         else:
             self.send_error(404) #404 Not Found
         return
@@ -112,18 +118,49 @@ def get_results():
 
 def processD():
     sqlData = {}
-    count = 0
     start = time.time()
     results = get_results()
     sqltime = time.time() - start
     print('sqltime: ' + str(sqltime))
     if results:
+        row = 0
         for (id_gateway_response_data, id_transaction, response, response_message, processor_txn_type, response_code) in results:
-            print(id_gateway_response_data, id_transaction, response, response_message, processor_txn_type, response_code)
-            count += 1
-            sqlData[count] = id_gateway_response_data, id_transaction, response, response_message, processor_txn_type, response_code
+            row += 1
+            #sqlData[row] = response_code, str(processor_txn_type).lower(), str(response_message).lower()
+            txn_type = str(processor_txn_type).lower()
+            rsp_msg  = str(response_message).lower()
+            sqlData[row] = 'verifi_response_code_count{code="' + str(response_code) + '",type="' + txn_type + '",message="' + rsp_msg + '"}'
 
-    gData = sqlData
+    dct = defaultdict(int)
+    for k,v in sqlData.items():
+        dct[v] += 1
+
+
+    #gData = dct
+    #for k,v in gData.items():
+    #    print(k, v)
+
+    #for k,v in dct.items():
+    #    item = str(k) + ' ' + str(v)
+    #    qData.put(item)
+
+    
+    promHELP = '# HELP verifi_response_code_count Total number of verifi response codes. Only updated after SQL query, not continuously.'
+    promTYPE = '# TYPE verifi_response_code_count counter'
+
+    gList.clear()
+    gList.append(promHELP)
+    gList.append(promTYPE)
+    for k,v in dct.items():
+        item = str(k) + ' ' + str(v)
+        gList.append(item)
+
+
+
+
+# HELP verifi_response_code_count Total number of verifi response codes. Only updated after SQL query, not continuously.
+# TYPE verifi_response_code_count counter
+
     
 def ticker():
     while (sigterm == False):
