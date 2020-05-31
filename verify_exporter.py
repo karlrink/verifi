@@ -1,21 +1,27 @@
 #!/usr/bin/env python3
 
-__version__='0000.0'
+__version__='0000.00'
 
-import time
 import sys
 sys.dont_write_bytecode = True
 
+def usage():
+    print("Usage: " + sys.argv[0] + " option" + """
+
+    options:
+    --web.listen-port=9181
+    --web.telemetry-path=/metrics
+    --log.level=info
+
+    --help
+    """)
+    sys.exit(0)
+
 from http.server import HTTPServer, BaseHTTPRequestHandler
-PORT_NUMBER = 9181
-
+import time
 import threading
-#import queue
-#qData = queue.Queue()
-
 from collections import defaultdict
 
-#gData = {}
 gList = []
 sigterm = False
 
@@ -36,16 +42,15 @@ except ImportError as e:
 
 class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
-        if self.path == '/metrics':
+        #print('PATH ' + METRIC_PATH)
+        #if self.path == '/metrics':
+        if self.path == METRIC_PATH:
             self.send_response(200)
             self.send_header("Content-type", "text/html; charset=utf-8")
             self.end_headers()
-            self.wfile.write(bytes(str(self.command) + str(' \n'),'utf-8'))
 
-            #for item in qData.queue:
             for item in gList:
-                self.wfile.write(bytes(str(item) + str(' \n'),'utf-8'))
-
+                self.wfile.write(bytes(str(item) + str('\n'), 'utf-8'))
 
         else:
             self.send_error(404) #404 Not Found
@@ -114,52 +119,50 @@ def get_results():
     return get_results
 
 
-
-
 def processD():
+    verifi_up = 0
     sqlData = {}
     start = time.time()
     results = get_results()
     sqltime = time.time() - start
-    print('sqltime: ' + str(sqltime))
     if results:
+        verifi_up = 1
         row = 0
         for (id_gateway_response_data, id_transaction, response, response_message, processor_txn_type, response_code) in results:
-            row += 1
-            #sqlData[row] = response_code, str(processor_txn_type).lower(), str(response_message).lower()
             txn_type = str(processor_txn_type).lower()
             rsp_msg  = str(response_message).lower()
+            row += 1
             sqlData[row] = 'verifi_response_code_count{code="' + str(response_code) + '",type="' + txn_type + '",message="' + rsp_msg + '"}'
 
     dct = defaultdict(int)
     for k,v in sqlData.items():
         dct[v] += 1
 
-
-    #gData = dct
-    #for k,v in gData.items():
-    #    print(k, v)
-
-    #for k,v in dct.items():
-    #    item = str(k) + ' ' + str(v)
-    #    qData.put(item)
-
-    
-    promHELP = '# HELP verifi_response_code_count Total number of verifi response codes. Only updated after SQL query, not continuously.'
-    promTYPE = '# TYPE verifi_response_code_count counter'
-
     gList.clear()
-    gList.append(promHELP)
-    gList.append(promTYPE)
+
+    promHELP0 = '# HELP verifi_up Whether the SQL service for verifi is up.'
+    promTYPE0 = '# TYPE verifi_up gauge'
+    promDATA0 = 'verifi_up ' + str(verifi_up)
+    gList.append(promHELP0)
+    gList.append(promTYPE0)
+    gList.append(promDATA0)
+
+    promHELP1 = '# HELP verifi_sql_query_time Number of seconds to query SQL.'
+    promTYPE1 = '# TYPE verifi_sql_query_time gauge'
+    promDATA1 = 'verifi_sql_query_time ' + str(sqltime)
+    gList.append(promHELP1)
+    gList.append(promTYPE1)
+    gList.append(promDATA1)
+
+    promHELP2 = '# HELP verifi_response_code_count Total number of verifi response codes. Only updated after SQL query, not continuously.'
+    promTYPE2 = '# TYPE verifi_response_code_count untyped'
+    gList.append(promHELP2)
+    gList.append(promTYPE2)
     for k,v in dct.items():
         item = str(k) + ' ' + str(v)
         gList.append(item)
 
-
-
-
-# HELP verifi_response_code_count Total number of verifi response codes. Only updated after SQL query, not continuously.
-# TYPE verifi_response_code_count counter
+    return True
 
     
 def ticker():
@@ -167,7 +170,7 @@ def ticker():
         processD()
         time.sleep(15)
 
-if __name__ == '__main__':
+def main(PORT_NUMBER, METRIC_PATH):
 
     watcher = threading.Thread(target=ticker, name="ticker")
     watcher.setDaemon(1)
@@ -184,7 +187,25 @@ if __name__ == '__main__':
     print(str(time.asctime()) + " Server Stop - " + str(PORT_NUMBER))
 
 
-#if __name__ == '__main__':
-#    sys.exit(main(sys.argv))
+if __name__ == '__main__':
+    PORT_NUMBER = 9181
+    METRIC_PATH = '/metrics'
 
+    if sys.argv[1:]:
+        for arg in sys.argv[1:]:
+            if arg == '--help':
+                usage()
+            if '=' in arg:
+                arg0 = arg.split('=')[0]
+                arg1 = arg.split('=')[1]
+                if arg0 == '--web.listen-port':
+                    PORT_NUMBER = int(arg1)
+                if arg0 == '--web.telemetry-path':
+                    METRIC_PATH = str(arg1)
+            else:
+                print('Unknown : ' + str(arg))
+                usage()
+
+                
+    sys.exit(main(PORT_NUMBER, METRIC_PATH))
 
