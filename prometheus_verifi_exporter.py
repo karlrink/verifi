@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-__version__='0000.001'
+__version__='0000.01'
 
 import sys
 sys.dont_write_bytecode = True
@@ -21,6 +21,7 @@ except ImportError as e:
 import time
 import logging
 from logging.handlers import RotatingFileHandler
+import signal, atexit
 
 import threading
 from collections import defaultdict
@@ -156,6 +157,9 @@ def ticker():
         processD()
         time.sleep(15)
 
+def stopped():
+    logger.info(str(time.asctime()) + ' Info: Server Stop on port ' + str(config.param['listenPort']))
+
 def main(args):
 
     runner = threading.Thread(target=ticker, name="ticker")
@@ -166,32 +170,24 @@ def main(args):
     httpd = HTTPServer(('', config.param['listenPort']), Handler)
     try:
         httpd.serve_forever()
-    except KeyboardInterrupt:
+    except (KeyboardInterrupt, SystemExit, Exception):
         sigterm == True
+        httpd.server_close()
 
-    httpd.server_close()
-    logger.info(str(time.asctime()) + ' Info: Server Stop on port ' + str(config.param['listenPort']))
-
-gList = []
-sigterm = False
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO)
-    logger = logging.getLogger(__name__)
+    gList = []
+    sigterm = False
 
-    # Add a file logger
-    #logger.addHandler(logging.FileHandler(str(config.param['logFile'])))
-    logger.addHandler(RotatingFileHandler(config.param['logFile'], maxBytes=100000, backupCount=10))
+    atexit.register(stopped) #python can't catch SIGKILL (kill -9)
+    signal.signal(signal.SIGTERM, lambda signum, stack_frame: sys.exit(1))
 
-    # Add a stream logger
-    logger.addHandler(logging.StreamHandler(sys.stdout))
-    logger.addHandler(logging.StreamHandler(sys.stderr))
-
-    #from systemd.journal import JournalHandler
-    #logger.addHandler(JournalHandler())
-
-    # Send a test message to critical will always log
-    #logger.critical("test msg")
+    handler = RotatingFileHandler(config.param['logFile'], maxBytes=100000, backupCount=10)
+    formatter = logging.Formatter(logging.BASIC_FORMAT)
+    handler.setFormatter(formatter)
+    logger = logging.getLogger()
+    logger.setLevel(logging.INFO)
+    logger.addHandler(handler)
 
     sys.exit(main(sys.argv))
 
