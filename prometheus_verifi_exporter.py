@@ -1,29 +1,14 @@
 #!/usr/bin/env python3
 
-__version__='0000.00'
+__version__='0000.001'
 
 import sys
 sys.dont_write_bytecode = True
-
-def usage():
-    print("Usage: " + sys.argv[0] + " option" + """
-
-    options:
-    --web.listen-port=9181
-    --web.telemetry-path=/metrics
-    --log.level=info
-
-    --help
-    """)
-    sys.exit(0)
-
-from http.server import HTTPServer, BaseHTTPRequestHandler
-import time
-import threading
-from collections import defaultdict
-
-gList = []
-sigterm = False
+try:
+    import config
+except ImportError as e:
+    print('Missing config.py: ' + str(e))
+    sys.exit(1)
 
 try:
     import mysql.connector
@@ -33,18 +18,20 @@ except ImportError as e:
     print('    debian install: apt-get install python3-mysql.connector')
     sys.exit(1)
 
-try:
-    import config
-except ImportError as e:
-    print('Missing config.py: ' + str(e))
-    sys.exit(1)
+import time
+import logging
+from logging.handlers import RotatingFileHandler
 
+import threading
+from collections import defaultdict
+from http.server import HTTPServer, BaseHTTPRequestHandler
 
 class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
-        #print('PATH ' + METRIC_PATH)
+        #127.0.0.1 - - [31/May/2020 19:09:05] "GET /metrics HTTP/1.1" 200 -
+        logger.info(str(self.client_address[0] + ' - - [' + time.asctime() + '] "' + self.command + ' ' + self.path + ' ' + self.request_version + '" 200 -'))
         #if self.path == '/metrics':
-        if self.path == METRIC_PATH:
+        if self.path == config.param['metricPath']:
             self.send_response(200)
             self.send_header("Content-type", "text/html; charset=utf-8")
             self.end_headers()
@@ -53,36 +40,34 @@ class Handler(BaseHTTPRequestHandler):
                 self.wfile.write(bytes(str(item) + str('\n'), 'utf-8'))
 
         else:
+            logger.info(str(self.client_address[0] + ' - - [' + time.asctime() + '] "' + self.command + ' ' + self.path + ' ' + self.request_version + '" 404 -'))
             self.send_error(404) #404 Not Found
         return
 
     def do_POST(self):
+        logger.info(str(self.client_address[0] + ' - - [' + time.asctime() + '] "' + self.command + ' ' + self.path + ' ' + self.request_version + '" 405 -'))
         self.send_error(405) #405 Method Not Allowed
         return
 
 def get_results():
 
-    dbSocket = config.param['dbSocket']
-    dbUser = config.param['dbUser']
-    dbPass = config.param['dbPass']
-
     try:
         _config = {
-            'user': dbUser,
-            'password': dbPass,
-            'unix_socket': dbSocket,
+            'user': config.param['dbUser'],
+            'password': config.param['dbPass'],
+            'unix_socket': config.param['dbSocket'],
             'database': '',
             'raise_on_warnings': True,
             'auth_plugin': 'mysql_native_password',
         }
     except Exception as e:
-        print(str(e)) 
+        logger.critical(str(e)) 
         return False
 
     try:
         cnx = mysql.connector.connect(**_config)
     except mysql.connector.Error as e:
-        print(str(e))
+        logger.critical(str(e))
         return False
 
     sql =  "SELECT nic_gateway.gateway_response_data.id_gateway_response_data,nic_gateway.gateway_response_data.id_transaction, "
@@ -104,9 +89,10 @@ def get_results():
             get_results = cursor.fetchall()
         else:
             get_results = ''
+            logger.warning(str(time.asctime() + ' Warning: get_results is Empty'))
 
     except Exception as e:
-        print(str(e))
+        logger.critical(str(e))
         return False
 
     cursor.close()
@@ -154,58 +140,58 @@ def processD():
     gList.append(promTYPE1)
     gList.append(promDATA1)
 
-    promHELP2 = '# HELP verifi_response_code_count Total number of verifi response codes. Only updated after SQL query, not continuously.'
-    promTYPE2 = '# TYPE verifi_response_code_count untyped'
-    gList.append(promHELP2)
-    gList.append(promTYPE2)
-    for k,v in dct.items():
-        item = str(k) + ' ' + str(v)
-        gList.append(item)
+    if verifi_up == 1:
+        promHELP2 = '# HELP verifi_response_code_count Total number of verifi response codes. Only updated after SQL query, not continuously.'
+        promTYPE2 = '# TYPE verifi_response_code_count untyped'
+        gList.append(promHELP2)
+        gList.append(promTYPE2)
+        for k,v in dct.items():
+            item = str(k) + ' ' + str(v)
+            gList.append(item)
 
     return True
 
-    
 def ticker():
     while (sigterm == False):
         processD()
         time.sleep(15)
 
-def main(PORT_NUMBER, METRIC_PATH):
+def main(args):
 
-    watcher = threading.Thread(target=ticker, name="ticker")
-    watcher.setDaemon(1)
-    watcher.start()
+    runner = threading.Thread(target=ticker, name="ticker")
+    runner.setDaemon(1)
+    runner.start()
 
-    print(str(time.asctime()) + " Server Start - " + str(PORT_NUMBER))
-    httpd = HTTPServer(('', PORT_NUMBER), Handler)
+    logger.info(str(time.asctime()) + ' Info: Server Start on port ' + str(config.param['listenPort']))
+    httpd = HTTPServer(('', config.param['listenPort']), Handler)
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:
         sigterm == True
 
     httpd.server_close()
-    print(str(time.asctime()) + " Server Stop - " + str(PORT_NUMBER))
+    logger.info(str(time.asctime()) + ' Info: Server Stop on port ' + str(config.param['listenPort']))
 
+gList = []
+sigterm = False
 
 if __name__ == '__main__':
-    PORT_NUMBER = 9181
-    METRIC_PATH = '/metrics'
+    logging.basicConfig(level=logging.INFO)
+    logger = logging.getLogger(__name__)
 
-    if sys.argv[1:]:
-        for arg in sys.argv[1:]:
-            if arg == '--help':
-                usage()
-            if '=' in arg:
-                arg0 = arg.split('=')[0]
-                arg1 = arg.split('=')[1]
-                if arg0 == '--web.listen-port':
-                    PORT_NUMBER = int(arg1)
-                if arg0 == '--web.telemetry-path':
-                    METRIC_PATH = str(arg1)
-            else:
-                print('Unknown : ' + str(arg))
-                usage()
+    # Add a file logger
+    #logger.addHandler(logging.FileHandler(str(config.param['logFile'])))
+    logger.addHandler(RotatingFileHandler(config.param['logFile'], maxBytes=100000, backupCount=10))
 
-                
-    sys.exit(main(PORT_NUMBER, METRIC_PATH))
+    # Add a stream logger
+    logger.addHandler(logging.StreamHandler(sys.stdout))
+    logger.addHandler(logging.StreamHandler(sys.stderr))
+
+    #from systemd.journal import JournalHandler
+    #logger.addHandler(JournalHandler())
+
+    # Send a test message to critical will always log
+    #logger.critical("test msg")
+
+    sys.exit(main(sys.argv))
 

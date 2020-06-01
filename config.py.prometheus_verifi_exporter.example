@@ -1,0 +1,10 @@
+
+param = dict(
+  dbUser = 'XXXXXX',
+  dbPass = 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
+  dbSocket = '/var/run/mysqld/mysqld.sock',
+  listenPort = 9181,
+  metricPath = '/metrics',
+  logFile = '/var/log/prometheus/prometheus-verifi-exporter.log'
+)
+

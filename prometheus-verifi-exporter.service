@@ -1,0 +1,12 @@
+[Unit]
+Description=Prometheus verifi exporter for MySQL server
+Documentation=https://prometheus.io/docs/introduction/overview/
+
+[Service]
+Restart=always
+User=prometheus
+ExecStart=/opt/verifi_exporter/prometheus_verifi_exporter.py
+
+[Install]
+WantedBy=multi-user.target
+
