@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-__version__='0000.01'
+__version__='0000.02'
 
 import sys
 sys.dont_write_bytecode = True
@@ -34,7 +34,7 @@ class Handler(BaseHTTPRequestHandler):
         #if self.path == '/metrics':
         if self.path == config.param['metricPath']:
             self.send_response(200)
-            self.send_header("Content-type", "text/html; charset=utf-8")
+            self.send_header("Content-type", "text/plain; charset=utf-8")
             self.end_headers()
 
             for item in gList:
@@ -71,17 +71,18 @@ def get_results():
         logger.critical(str(e))
         return False
 
-    sql =  "SELECT nic_gateway.gateway_response_data.id_gateway_response_data,nic_gateway.gateway_response_data.id_transaction, "
-    sql += "       nic_gateway.gateway_response_data.response,nic_gateway.gateway_response_data.response_message, "
-    sql += "       nic_gateway.gateway_response_data.processor_txn_type,nic_gateway.gateway_response_data.response_code "
-    sql += "FROM nic_gateway.gateway_response_data " 
-    sql += "WHERE nic_gateway.gateway_response_data.id_transaction IN ( "
-    sql += "  SELECT transaction.id_transaction "
-    sql += "  FROM nic_gateway.transaction "
-    sql += "  WHERE transaction.transaction_date >= NOW() - INTERVAL 5 MINUTE "
-    sql += "  AND id_transaction > (SELECT MAX(id_transaction) FROM nic_gateway.transaction) - 100000 "
-    sql += " );"
-    #sql += "LIMIT 5"
+    sql =  """SELECT nic_gateway.gateway_response_data.id_gateway_response_data,nic_gateway.gateway_response_data.id_transaction, 
+                     nic_gateway.gateway_response_data.response,nic_gateway.gateway_response_data.response_message, 
+                     nic_gateway.gateway_response_data.processor_txn_type,nic_gateway.gateway_response_data.response_code,
+                     nic_gateway.merchant_processor.id_merchant_processor, nic_gateway.merchant_processor.processor_name
+              FROM nic_gateway.gateway_response_data, nic_gateway.merchant_processor
+              WHERE nic_gateway.gateway_response_data.id_transaction IN ( 
+              SELECT transaction.id_transaction 
+              FROM nic_gateway.transaction 
+              WHERE transaction.transaction_date >= NOW() - INTERVAL 5 MINUTE 
+              AND id_transaction > (SELECT MAX(id_transaction) FROM nic_gateway.transaction) - 100000 
+              );
+    """
 
     cursor = cnx.cursor(buffered=True)
     try:
@@ -115,11 +116,11 @@ def processD():
     if results:
         verifi_up = 1
         row = 0
-        for (id_gateway_response_data, id_transaction, response, response_message, processor_txn_type, response_code) in results:
+        for (id_gateway_response_data, id_transaction, response, response_message, processor_txn_type, response_code, id_merchant, processor_name) in results:
             txn_type = str(processor_txn_type).lower()
             rsp_msg  = str(response_message).lower()
             row += 1
-            sqlData[row] = 'verifi_response_code_count{code="' + str(response_code) + '",type="' + txn_type + '",message="' + rsp_msg + '"}'
+            sqlData[row] = 'verifi_response_code_count{code="'+str(response_code)+'",type="'+txn_type+'",message="'+rsp_msg+'",mid="'+str(id_merchant)+'",mname="'+processor_name+'"}'
 
     dct = defaultdict(int)
     for k,v in sqlData.items():
