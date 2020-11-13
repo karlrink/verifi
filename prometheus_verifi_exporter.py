@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-__version__='0000.02'
+__version__='0000.03'
 
 import sys
 sys.dont_write_bytecode = True
@@ -120,7 +120,8 @@ def processD():
             txn_type = str(processor_txn_type).lower()
             rsp_msg  = str(response_message).lower()
             row += 1
-            sqlData[row] = 'verifi_response_code_count{code="'+str(response_code)+'",type="'+txn_type+'",message="'+rsp_msg+'",mid="'+str(id_merchant)+'",mname="'+processor_name+'"}'
+            #sqlData[row] = 'verifi_response_code_count{code="'+str(response_code)+'",type="'+txn_type+'",message="'+rsp_msg+'",mid="'+str(id_merchant)+'",mname="'+processor_name+'"}'
+            sqlData[row] = 'verifi_response_code_count{code="'+str(response_code)+'",type="'+txn_type+'",message="'+rsp_msg+'",mname="'+processor_name+'"}'
 
     dct = defaultdict(int)
     for k,v in sqlData.items():
