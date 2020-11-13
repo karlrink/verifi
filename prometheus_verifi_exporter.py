@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-__version__='0000.03'
+__version__='0000.03.1'
 
 import sys
 sys.dont_write_bytecode = True
@@ -173,7 +173,7 @@ def main(args):
     try:
         httpd.serve_forever()
     except (KeyboardInterrupt, SystemExit, Exception):
-        sigterm == True
+        sigterm = True
         httpd.server_close()
 
 
