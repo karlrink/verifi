@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-__version__='0000.03.1'
+__version__='0000.04'
 
 import sys
 sys.dont_write_bytecode = True
@@ -73,9 +73,8 @@ def get_results():
 
     sql =  """SELECT nic_gateway.gateway_response_data.id_gateway_response_data,nic_gateway.gateway_response_data.id_transaction, 
                      nic_gateway.gateway_response_data.response,nic_gateway.gateway_response_data.response_message, 
-                     nic_gateway.gateway_response_data.processor_txn_type,nic_gateway.gateway_response_data.response_code,
-                     nic_gateway.merchant_processor.id_merchant_processor, nic_gateway.merchant_processor.processor_name
-              FROM nic_gateway.gateway_response_data, nic_gateway.merchant_processor
+                     nic_gateway.gateway_response_data.processor_txn_type,nic_gateway.gateway_response_data.response_code
+              FROM nic_gateway.gateway_response_data
               WHERE nic_gateway.gateway_response_data.id_transaction IN ( 
               SELECT transaction.id_transaction 
               FROM nic_gateway.transaction 
@@ -116,12 +115,11 @@ def processD():
     if results:
         verifi_up = 1
         row = 0
-        for (id_gateway_response_data, id_transaction, response, response_message, processor_txn_type, response_code, id_merchant, processor_name) in results:
+        for (id_gateway_response_data, id_transaction, response, response_message, processor_txn_type, response_code) in results:
             txn_type = str(processor_txn_type).lower()
             rsp_msg  = str(response_message).lower()
             row += 1
-            #sqlData[row] = 'verifi_response_code_count{code="'+str(response_code)+'",type="'+txn_type+'",message="'+rsp_msg+'",mid="'+str(id_merchant)+'",mname="'+processor_name+'"}'
-            sqlData[row] = 'verifi_response_code_count{code="'+str(response_code)+'",type="'+txn_type+'",message="'+rsp_msg+'",mname="'+processor_name+'"}'
+            sqlData[row] = 'verifi_response_code_count{code="'+str(response_code)+'",type="'+txn_type+'",message="'+rsp_msg+'"}'
 
     dct = defaultdict(int)
     for k,v in sqlData.items():
