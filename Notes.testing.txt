@@ -1,0 +1,76 @@
+
+verifi_response_code_processor_count{processor_name="ZHH-QP-Vit-1",code="225"} 2
+verifi_response_code_processor_count{processor_name="[C] ZF-SP-Vit-1",code="225"} 2
+verifi_response_code_processor_count{processor_name="[C] ZHH-SP-Vit-1",code="225"} 2
+verifi_response_code_processor_count{processor_name="CFH-BLS-1",code="225"} 2
+verifi_response_code_processor_count{processor_name="RBO-BLS-1",code="225"} 2
+verifi_response_code_processor_count{processor_name="HF-TRX-Vit-1",code="225"} 2
+verifi_response_code_processor_count{processor_name="UF-TRX-Vit-1",code="225"} 2
+verifi_response_code_processor_count{processor_name="CSRC-TRX-Vit-1",code="225"} 2
+verifi_response_code_processor_count{processor_name="ZF-TRX-Vit-1",code="225"} 2
+verifi_response_code_processor_count{processor_name="ZHH-TRX-Vit-1",code="225"} 2
+verifi_response_code_processor_count{processor_name="[C]BD-SP-Vit-2",code="225"} 2
+verifi_response_code_processor_count{processor_name="BD-TRX-Vit-1",code="225"} 2
+verifi_response_code_processor_count{processor_name="[C]FF-SP-Vit-3",code="225"} 2
+verifi_response_code_processor_count{processor_name="[C] GFH-SP-Vit-3",code="225"} 2
+verifi_response_code_processor_count{processor_name="[C] RTOi-SP-Vit-3",code="225"} 2
+verifi_response_code_processor_count{processor_name="RTOi-TRX-Vit-2",code="225"} 2
+verifi_response_code_processor_count{processor_name="WF-TRX-Vit-1",code="225"} 2
+verifi_response_code_processor_count{processor_name="[C] WF-SP-Vit-3",code="225"} 2
+verifi_response_code_processor_count{processor_name="FF-TRX-Vit-1",code="225"} 2
+verifi_response_code_processor_count{processor_name="GFH-TRX-Vit-1",code="225"} 2
+verifi_response_code_processor_count{processor_name="HHU-TRX-Vit-1",code="225"} 2
+verifi_response_code_processor_count{processor_name="MRE-TRX-Vit-1",code="225"} 2
+verifi_response_code_processor_count{processor_name="MRE-TRX-Vit-2",code="225"} 2
+verifi_response_code_processor_count{processor_name="IRE-JP-Vit-1",code="225"} 2
+verifi_response_code_processor_count{processor_name="ZF-BLS-1",code="225"} 2
+verifi_response_code_processor_count{processor_name="ZHH-BLS-1",code="225"} 2
+verifi_response_code_processor_count{processor_name="UF-BLS-1",code="225"} 2
+verifi_response_code_processor_count{processor_name="CRCO-SP-Vit-1",code="225"} 2
+verifi_response_code_processor_count{processor_name="[C] CCS-SP-Vit-1",code="225"} 2
+verifi_response_code_processor_count{processor_name="CRCO-BLS-1",code="225"} 2
+verifi_response_code_processor_count{processor_name="CCS-BLS-1",code="225"} 2
+verifi_response_code_processor_count{processor_name="[C] CRCO-SP-Vit-1",code="225"} 2
+verifi_response_code_processor_count{processor_name="HF-BLS-1",code="225"} 2
+verifi_response_code_processor_count{processor_name="HHU-BLS-1",code="225"} 2
+verifi_response_code_processor_count{processor_name="MRE-BLS-1",code="225"} 2
+verifi_response_code_processor_count{processor_name="GRTO-TRX-Vit-1",code="225"} 2
+verifi_response_code_processor_count{processor_name="YRTO-TRX-Vit-1",code="225"} 2
+verifi_response_code_processor_count{processor_name="FH-BLS-1",code="225"} 2
+verifi_response_code_processor_count{processor_name="HL-BLS-1",code="225"} 2
+verifi_response_code_processor_count{processor_name="CSRC-BLS-1",code="225"} 2
+verifi_response_code_processor_count{processor_name="R2OU-BLS-1",code="225"} 2
+verifi_response_code_processor_count{processor_name="FF-BLS-1",code="225"} 2
+verifi_response_code_processor_count{processor_name="MTE-ST-Vit",code="225"} 2
+verifi_response_code_processor_count{processor_name="HL-HMS-EPX-1",code="225"} 4
+verifi_response_code_processor_count{processor_name="YRTO-HMS-EPX-1",code="225"} 2
+verifi_response_code_processor_count{processor_name="YSAM-HMS-EPX-1",code="225"} 2
+verifi_response_code_processor_count{processor_name="[C] HL-HMS-FDN-1",code="225"} 2
+verifi_response_code_processor_count{processor_name="[C] YSAM-HMS-EPX-1",code="225"} 2
+verifi_response_code_processor_count{processor_name="[C] YRTO-HMS-EPX-1",code="225"} 2
+verifi_response_code_processor_count{processor_name="[C] HL-HMS-EPX-1",code="225"} 2
+verifi_response_code_processor_count{processor_name="[C] YSAM-HMS-FDN-1",code="225"} 2
+verifi_response_code_processor_count{processor_name="[C] YRTO-HMS-FDN-1",code="225"} 2
+verifi_response_code_processor_count{processor_name="CSRC-TRX-VIT-2",code="225"} 2
+verifi_response_code_processor_count{processor_name="GRTO-TRX-VIT-2",code="225"} 2
+verifi_response_code_processor_count{processor_name="YRTO-TRX-VIT-2",code="225"} 2
+verifi_response_code_processor_count{processor_name="[C] YSAM-TRX-VIT-1",code="225"} 2
+verifi_response_code_processor_count{processor_name="YSAM-TRX-VIT-1",code="225"} 2
+verifi_response_code_processor_count{processor_name="HL-TRX-VIT-2",code="225"} 2
+verifi_response_code_processor_count{processor_name="RTOi-TRX-VIT-3",code="225"} 2
+verifi_response_code_processor_count{processor_name="WF-TRX-VIT-2",code="225"} 2
+verifi_response_code_processor_count{processor_name="FH-TRX-Vit-2",code="225"} 2
+verifi_response_code_processor_count{processor_name="RBO-TRX-Vit-2",code="225"} 2
+verifi_response_code_processor_count{processor_name="RS-TRX-Vit-2",code="225"} 2
+verifi_response_code_processor_count{processor_name="YSAM-TRX-Vit-2",code="225"} 2
+verifi_response_code_processor_count{processor_name="[C] CCS-PA-VIT-1",code="225"} 2
+verifi_response_code_processor_count{processor_name="[C] CFH-PA-VIT-1",code="225"} 2
+verifi_response_code_processor_count{processor_name="CRCO-PA-VIT-1",code="225"} 2
+verifi_response_code_processor_count{processor_name="[C] YSAM-PA-VIT-1",code="225"} 2
+verifi_response_code_processor_count{processor_name="IRE-TRX-Vit-2",code="225"} 2
+verifi_response_code_processor_count{processor_name="MRE-TRX-Vit-3",code="225"} 2
+verifi_response_code_processor_count{processor_name="BD-TRX-Vit-2",code="225"} 2
+verifi_response_code_processor_count{processor_name="FF-TRX-Vit-2",code="225"} 2
+
+
+
