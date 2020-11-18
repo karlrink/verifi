@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-__version__='0000.05'
+__version__='0000.05.1'
 
 import sys
 sys.dont_write_bytecode = True
@@ -131,32 +131,32 @@ def processD():
         Dct1b[v] += 1
 
 
-    sql2Dct = {}
-    sql2_up = 0
-    sql2 =  """SELECT  nic_gateway.merchant_processor.processor_name,nic_gateway.gateway_response_data.response_code
-              FROM nic_gateway.gateway_response_data, nic_gateway.merchant_processor
-              WHERE nic_gateway.gateway_response_data.id_transaction IN (
-              SELECT transaction.id_transaction
-              FROM nic_gateway.transaction
-              WHERE transaction.transaction_date >= NOW() - INTERVAL 5 MINUTE
-              AND id_transaction > (SELECT MAX(id_transaction) FROM nic_gateway.transaction) - 100000 );
-    """
-    start2 = time.time()
-    sql2_results = get_results(sql2)
-    sqltime2 = time.time() - start2
-    if sql2_results:
-        sql2_up = 1
-        row = 0
-        for (processor_name, response_code) in sql2_results:
-            if processor_name == None:
-                processor_name = 'None'
-
-            row += 1
-            sql2Dct[row] = 'verifi_response_code_processor_count{processor_name="'+str(processor_name)+'",code="'+str(response_code)+'"}'
-
-    Dct2 = collections.defaultdict(int)
-    for k,v in sql2Dct.items():
-        Dct2[v] += 1
+#    sql2Dct = {}
+#    sql2_up = 0
+#    sql2 =  """SELECT  nic_gateway.merchant_processor.processor_name,nic_gateway.gateway_response_data.response_code
+#              FROM nic_gateway.gateway_response_data, nic_gateway.merchant_processor
+#              WHERE nic_gateway.gateway_response_data.id_transaction IN (
+#              SELECT transaction.id_transaction
+#              FROM nic_gateway.transaction
+#              WHERE transaction.transaction_date >= NOW() - INTERVAL 5 MINUTE
+#              AND id_transaction > (SELECT MAX(id_transaction) FROM nic_gateway.transaction) - 100000 );
+#    """
+#    start2 = time.time()
+#    sql2_results = get_results(sql2)
+#    sqltime2 = time.time() - start2
+#    if sql2_results:
+#        sql2_up = 1
+#        row = 0
+#        for (processor_name, response_code) in sql2_results:
+#            if processor_name == None:
+#                processor_name = 'None'
+#
+#            row += 1
+#            sql2Dct[row] = 'verifi_response_code_processor_count{processor_name="'+str(processor_name)+'",code="'+str(response_code)+'"}'
+#
+#    Dct2 = collections.defaultdict(int)
+#    for k,v in sql2Dct.items():
+#        Dct2[v] += 1
 
 
     
@@ -172,12 +172,12 @@ def processD():
             item = str(k) + ' ' + str(v)
             gList.append(item)
 
-    gList.append('verifi_sql2_up ' + str(sql2_up))
-    gList.append('verifi_sql2_query_time ' + str(sqltime2))
-    if sql2_up == 1:
-        for k,v in Dct2.items():
-            item = str(k) + ' ' + str(v)
-            gList.append(item)
+#    gList.append('verifi_sql2_up ' + str(sql2_up))
+#    gList.append('verifi_sql2_query_time ' + str(sqltime2))
+#    if sql2_up == 1:
+#        for k,v in Dct2.items():
+#            item = str(k) + ' ' + str(v)
+#            gList.append(item)
 
     return True
 
