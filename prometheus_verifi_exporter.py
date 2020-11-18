@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-__version__='0000.04'
+__version__='0000.05'
 
 import sys
 sys.dont_write_bytecode = True
@@ -24,15 +24,15 @@ from logging.handlers import RotatingFileHandler
 import signal, atexit
 
 import threading
-from collections import defaultdict
+#from collections import defaultdict
+import collections
+
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
-        #127.0.0.1 - - [31/May/2020 19:09:05] "GET /metrics HTTP/1.1" 200 -
         logger.info(str(self.client_address[0] + ' - - [' + time.asctime() + '] "' + self.command + ' ' + self.path + ' ' + self.request_version + '" 200 -'))
-        #if self.path == '/metrics':
-        if self.path == config.param['metricPath']:
+        if self.path == config.param['metricPath']: #'/metrics'
             self.send_response(200)
             self.send_header("Content-type", "text/plain; charset=utf-8")
             self.end_headers()
@@ -50,7 +50,7 @@ class Handler(BaseHTTPRequestHandler):
         self.send_error(405) #405 Method Not Allowed
         return
 
-def get_results():
+def get_results(sql):
 
     try:
         _config = {
@@ -71,18 +71,6 @@ def get_results():
         logger.critical(str(e))
         return False
 
-    sql =  """SELECT nic_gateway.gateway_response_data.id_gateway_response_data,nic_gateway.gateway_response_data.id_transaction, 
-                     nic_gateway.gateway_response_data.response,nic_gateway.gateway_response_data.response_message, 
-                     nic_gateway.gateway_response_data.processor_txn_type,nic_gateway.gateway_response_data.response_code
-              FROM nic_gateway.gateway_response_data
-              WHERE nic_gateway.gateway_response_data.id_transaction IN ( 
-              SELECT transaction.id_transaction 
-              FROM nic_gateway.transaction 
-              WHERE transaction.transaction_date >= NOW() - INTERVAL 5 MINUTE 
-              AND id_transaction > (SELECT MAX(id_transaction) FROM nic_gateway.transaction) - 100000 
-              );
-    """
-
     cursor = cnx.cursor(buffered=True)
     try:
         cursor.execute(sql)
@@ -100,53 +88,94 @@ def get_results():
     cnx.close()
 
     # work with the data...
-    # we have get_results fetchall()/list
+    # we have get_results fetchall()
     #for row in get_results:
     #    print(row)
     return get_results
 
 
 def processD():
-    verifi_up = 0
-    sqlData = {}
-    start = time.time()
-    results = get_results()
-    sqltime = time.time() - start
-    if results:
-        verifi_up = 1
+
+    sql1Dct1 = {}
+    sql1Dct2 = {}
+    sql1_up = 0
+    sql1 =  """SELECT nic_gateway.gateway_response_data.id_gateway_response_data,nic_gateway.gateway_response_data.id_transaction, 
+                      nic_gateway.gateway_response_data.response,nic_gateway.gateway_response_data.response_message, 
+                      nic_gateway.gateway_response_data.processor_txn_type,nic_gateway.gateway_response_data.response_code
+              FROM nic_gateway.gateway_response_data
+              WHERE nic_gateway.gateway_response_data.id_transaction IN ( 
+              SELECT transaction.id_transaction 
+              FROM nic_gateway.transaction 
+              WHERE transaction.transaction_date >= NOW() - INTERVAL 5 MINUTE 
+              AND id_transaction > (SELECT MAX(id_transaction) FROM nic_gateway.transaction) - 100000 );
+    """
+    start1 = time.time()
+    sql1_results = get_results(sql1)
+    sqltime1 = time.time() - start1
+    if sql1_results:
+        sql1_up = 1
         row = 0
-        for (id_gateway_response_data, id_transaction, response, response_message, processor_txn_type, response_code) in results:
+        for (id_gateway_response_data, id_transaction, response, response_message, processor_txn_type, response_code) in sql1_results:
             txn_type = str(processor_txn_type).lower()
             rsp_msg  = str(response_message).lower()
             row += 1
-            sqlData[row] = 'verifi_response_code_count{code="'+str(response_code)+'",type="'+txn_type+'",message="'+rsp_msg+'"}'
+            sql1Dct1[row] = 'verifi_response_code_count{code="'+str(response_code)+'",type="'+txn_type+'"}'
+            sql1Dct2[row] = 'verifi_response_code_message_count{code="'+str(response_code)+'",type="'+txn_type+'",message="'+rsp_msg+'"}'
 
-    dct = defaultdict(int)
-    for k,v in sqlData.items():
-        dct[v] += 1
+    Dct1a = collections.defaultdict(int)
+    for k,v in sql1Dct1.items():
+        Dct1a[v] += 1
 
+    Dct1b = collections.defaultdict(int)
+    for k,v in sql1Dct2.items():
+        Dct1b[v] += 1
+
+
+    sql2Dct = {}
+    sql2_up = 0
+    sql2 =  """SELECT  nic_gateway.merchant_processor.processor_name,nic_gateway.gateway_response_data.response_code
+              FROM nic_gateway.gateway_response_data, nic_gateway.merchant_processor
+              WHERE nic_gateway.gateway_response_data.id_transaction IN (
+              SELECT transaction.id_transaction
+              FROM nic_gateway.transaction
+              WHERE transaction.transaction_date >= NOW() - INTERVAL 5 MINUTE
+              AND id_transaction > (SELECT MAX(id_transaction) FROM nic_gateway.transaction) - 100000 );
+    """
+    start2 = time.time()
+    sql2_results = get_results(sql2)
+    sqltime2 = time.time() - start2
+    if sql2_results:
+        sql2_up = 1
+        row = 0
+        for (processor_name, response_code) in sql2_results:
+            if processor_name == None:
+                processor_name = 'None'
+
+            row += 1
+            sql2Dct[row] = 'verifi_response_code_processor_count{processor_name="'+str(processor_name)+'",code="'+str(response_code)+'"}'
+
+    Dct2 = collections.defaultdict(int)
+    for k,v in sql2Dct.items():
+        Dct2[v] += 1
+
+
+    
     gList.clear()
 
-    promHELP0 = '# HELP verifi_up Whether the SQL service for verifi is up.'
-    promTYPE0 = '# TYPE verifi_up gauge'
-    promDATA0 = 'verifi_up ' + str(verifi_up)
-    gList.append(promHELP0)
-    gList.append(promTYPE0)
-    gList.append(promDATA0)
+    gList.append('verifi_sql1_up ' + str(sql1_up))
+    gList.append('verifi_sql1_query_time ' + str(sqltime1))
+    if sql1_up == 1:
+        for k,v in Dct1a.items():
+            item = str(k) + ' ' + str(v)
+            gList.append(item)
+        for k,v in Dct1b.items():
+            item = str(k) + ' ' + str(v)
+            gList.append(item)
 
-    promHELP1 = '# HELP verifi_sql_query_time Number of seconds to query SQL.'
-    promTYPE1 = '# TYPE verifi_sql_query_time gauge'
-    promDATA1 = 'verifi_sql_query_time ' + str(sqltime)
-    gList.append(promHELP1)
-    gList.append(promTYPE1)
-    gList.append(promDATA1)
-
-    if verifi_up == 1:
-        promHELP2 = '# HELP verifi_response_code_count Total number of verifi response codes. Only updated after SQL query, not continuously.'
-        promTYPE2 = '# TYPE verifi_response_code_count untyped'
-        gList.append(promHELP2)
-        gList.append(promTYPE2)
-        for k,v in dct.items():
+    gList.append('verifi_sql2_up ' + str(sql2_up))
+    gList.append('verifi_sql2_query_time ' + str(sqltime2))
+    if sql2_up == 1:
+        for k,v in Dct2.items():
             item = str(k) + ' ' + str(v)
             gList.append(item)
 
