@@ -1,4 +1,49 @@
 
+karl.rink@db01repl2:/opt/verifi_exporter$ curl localhost:9181/metrics
+verifi_sql1_up 1
+verifi_sql1_query_time 0.29545021057128906
+verifi_response_code_count{code="100",type="validate"} 10
+verifi_response_code_count{code="100",type="sale"} 64
+verifi_response_code_count{code="202",type="sale"} 13
+verifi_response_code_count{code="200",type="sale"} 5
+verifi_response_code_count{code="801",type="sale"} 5
+verifi_response_code_count{code="220",type="sale"} 1
+verifi_response_code_count{code="100",type="void"} 3
+verifi_response_code_count{code="100",type="auth"} 1
+verifi_response_code_count{code="100",type="refund"} 5
+verifi_response_code_count{code="441",type="sale"} 1
+verifi_response_code_count{code="441",type="validate"} 1
+verifi_response_code_count{code="204",type="validate"} 1
+verifi_response_code_count{code="225",type="sale"} 3
+verifi_response_code_count{code="200",type="auth"} 2
+verifi_response_code_count{code="223",type="sale"} 1
+verifi_response_code_count{code="400",type="sale"} 1
+verifi_response_code_count{code="400",type="validate"} 1
+verifi_response_code_message_count{code="100",type="validate",message="approved"} 10
+verifi_response_code_message_count{code="100",type="sale",message="approved"} 60
+verifi_response_code_message_count{code="202",type="sale",message="transaction failed  because of payment processing failure.: 302 - insufficient funds. please use another card or contact your bank for assistance"} 9
+verifi_response_code_message_count{code="200",type="sale",message="issuer declined"} 5
+verifi_response_code_message_count{code="801",type="sale",message="expired cards 0000 bin decline (hhu)"} 1
+verifi_response_code_message_count{code="801",type="sale",message="no retention bin - 2014.05.07 - (hf)"} 1
+verifi_response_code_message_count{code="220",type="sale",message="transaction failed  because of payment processing failure.: 201 - invalid card number. please check the number and try again, or use a different card"} 1
+verifi_response_code_message_count{code="202",type="sale",message="insufficient funds"} 4
+verifi_response_code_message_count{code="100",type="sale",message="approval"} 4
+verifi_response_code_message_count{code="801",type="sale",message="prepaid decline 2013.02.13 - (ysam)"} 3
+verifi_response_code_message_count{code="100",type="void",message="transaction void successful"} 3
+verifi_response_code_message_count{code="100",type="auth",message="approved"} 1
+verifi_response_code_message_count{code="100",type="refund",message="approved"} 3
+verifi_response_code_message_count{code="441",type="sale",message="invalid transaction"} 1
+verifi_response_code_message_count{code="441",type="validate",message="invalid transaction"} 1
+verifi_response_code_message_count{code="204",type="validate",message="issuer declined mcc"} 1
+verifi_response_code_message_count{code="100",type="refund",message="success"} 2
+verifi_response_code_message_count{code="225",type="sale",message="cvv2 mismatch"} 3
+verifi_response_code_message_count{code="200",type="auth",message="issuer declined"} 2
+verifi_response_code_message_count{code="223",type="sale",message="expired card"} 1
+verifi_response_code_message_count{code="400",type="sale",message="general error"} 1
+verifi_response_code_message_count{code="400",type="validate",message="general error"} 1
+karl.rink@db01repl2:/opt/verifi_exporter$ 
+
+
 verifi_response_code_processor_count{processor_name="ZHH-QP-Vit-1",code="225"} 2
 verifi_response_code_processor_count{processor_name="[C] ZF-SP-Vit-1",code="225"} 2
 verifi_response_code_processor_count{processor_name="[C] ZHH-SP-Vit-1",code="225"} 2
